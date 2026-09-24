@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>春日行事曆</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --pink: #f6c9da;
+    --pink-deep: #e894b7;
+    --jade: #9ad4b6;
+    --jade-deep: #5fa988;
+    --lavender: #cdbdec;
+    --lavender-deep: #a687d9;
+    --yellow: #f8de8b;
+    --yellow-deep: #ecc247;
+    --bg: #fff8f3;
+    --bg-soft: #fdeff0;
+    --card: #ffffff;
+    --ink: #4a4056;
+    --ink-soft: #8a7f92;
+    --ink-faint: #b7abbe;
+    --border: #f1dfe8;
+    --danger: #e08a8a;
+    --shadow: 0 6px 20px rgba(180, 140, 160, 0.14);
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --pink: #c98aa8; --pink-deep: #e6a6c4;
+      --jade: #5b9a7d; --jade-deep: #7fc4a3;
+      --lavender: #9077c2; --lavender-deep: #bda3ec;
+      --yellow: #c9a94a; --yellow-deep: #ecc96e;
+      --bg: #2a2432; --bg-soft: #332b3c;
+      --card: #362e40; --ink: #f3eaf5; --ink-soft: #c7b9cf; --ink-faint: #8d7f96;
+      --border: #473c52; --danger: #e08a8a;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --pink: #c98aa8; --pink-deep: #e6a6c4;
+    --jade: #5b9a7d; --jade-deep: #7fc4a3;
+    --lavender: #9077c2; --lavender-deep: #bda3ec;
+    --yellow: #c9a94a; --yellow-deep: #ecc96e;
+    --bg: #2a2432; --bg-soft: #332b3c;
+    --card: #362e40; --ink: #f3eaf5; --ink-soft: #c7b9cf; --ink-faint: #8d7f96;
+    --border: #473c52; --danger: #e08a8a;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+  body {
+    margin: 0;
+    font-family: 'Noto Sans TC', sans-serif;
+    background: linear-gradient(180deg, var(--bg-soft) 0%, var(--bg) 340px);
+    color: var(--ink);
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    -webkit-tap-highlight-color: transparent;
+  }
+  h1, h2, h3 { font-family: 'Noto Serif TC', serif; margin: 0; }
+  button { font-family: inherit; }
+
+  #app { max-width: 480px; margin: 0 auto; min-height: 100%; display: flex; flex-direction: column; }
+
+  /* ---------- top bar ---------- */
+  .topbar {
+    position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5;
+    padding: 18px 20px 14px;
+    background: var(--bg-soft);
+    border-bottom: 1px solid var(--border);
+  }
+  .topbar .brand { display: flex; align-items: center; gap: 8px; }
+  .topbar .brand svg { width: 26px; height: 26px; flex: none; }
+  .topbar h1 { font-size: 19px; font-weight: 700; color: var(--ink); }
+  .topbar .sub { font-size: 12.5px; color: var(--ink-soft); margin-top: 3px; }
+
+  /* ---------- views ---------- */
+  main { flex: 1; padding: 16px 16px 100px; }
+  .view { display: none; animation: fadeIn .25s ease; }
+  .view.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px);} to { opacity: 1; transform: none;} }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 16px;
+    box-shadow: var(--shadow);
+    margin-bottom: 14px;
+  }
+
+  /* ---------- encouragement banner ---------- */
+  .encourage {
+    display: flex; align-items: center; gap: 10px;
+    background: linear-gradient(120deg, var(--pink) 0%, var(--lavender) 100%);
+    color: #4a3550;
+    border-radius: 16px;
+    padding: 13px 14px;
+    margin-bottom: 14px;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  :root[data-theme="dark"] .encourage, @media (prefers-color-scheme: dark) { }
+  .encourage .quote { flex: 1; font-weight: 500; }
+  .encourage button {
+    flex: none; border: none; background: rgba(255,255,255,.55);
+    width: 30px; height: 30px; border-radius: 50%; font-size: 14px; cursor: pointer;
+    color: #4a3550;
+  }
+
+  /* ---------- section headers ---------- */
+  .section-title { display: flex; align-items: baseline; justify-content: space-between; margin: 4px 2px 10px; }
+  .section-title h2 { font-size: 16px; color: var(--ink); }
+  .section-title .meta { font-size: 12px; color: var(--ink-soft); }
+
+  /* ---------- task list ---------- */
+  ul.tasks { list-style: none; margin: 0; padding: 0; }
+  ul.tasks li {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 2px; border-bottom: 1px solid var(--border);
+  }
+  ul.tasks li:last-child { border-bottom: none; }
+  ul.tasks li { align-items: flex-start; }
+  .chk {
+    flex: none; width: 22px; height: 22px; border-radius: 50%; margin-top: 2px;
+    border: 2px solid var(--jade-deep); background: transparent; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; color: var(--jade-deep); font-size: 13px;
+  }
+  .chk.done { background: var(--jade-deep); color: #fff; }
+  .task-main { flex: 1; min-width: 0; }
+  li.done .task-text { text-decoration: line-through; color: var(--ink-faint); }
+  .task-text {
+    width: 100%; border: none; background: transparent; font-size: 14.5px; color: var(--ink);
+    font-family: inherit; padding: 4px 2px; min-width: 0;
+  }
+  .task-text:focus { outline: none; border-bottom: 1px solid var(--lavender-deep); }
+  .task-time { display: flex; align-items: center; gap: 6px; padding: 0 2px; margin-top: 2px; }
+  .task-time input[type=time] {
+    border: 1px solid var(--border); background: var(--bg-soft); border-radius: 8px;
+    padding: 3px 5px; font-size: 11.5px; color: var(--ink-soft); font-family: inherit; width: 76px;
+  }
+  .task-time input[type=time]:focus { outline: none; border-color: var(--lavender-deep); color: var(--ink); }
+  .task-time .sep { font-size: 11px; color: var(--ink-faint); }
+  .del {
+    flex: none; border: none; background: transparent; color: var(--ink-faint);
+    font-size: 15px; cursor: pointer; padding: 4px 6px; border-radius: 8px; margin-top: 2px;
+  }
+  .del:active { background: var(--bg-soft); color: var(--danger); }
+  .empty-hint { font-size: 13px; color: var(--ink-faint); padding: 10px 2px; }
+
+  .add-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+  .add-row input[type=text] {
+    flex: 1 1 100%; border: 1px solid var(--border); background: var(--bg-soft);
+    border-radius: 12px; padding: 10px 12px; font-size: 14px; color: var(--ink); font-family: inherit; min-width: 0;
+  }
+  .add-row .time-pick { display: flex; align-items: center; gap: 6px; flex: 1; }
+  .add-row .time-pick span { font-size: 11px; color: var(--ink-faint); }
+  .add-row input[type=time] {
+    flex: 1; border: 1px solid var(--border); background: var(--bg-soft); border-radius: 10px;
+    padding: 8px 6px; font-size: 12.5px; color: var(--ink); font-family: inherit; min-width: 0;
+  }
+  .add-row input:focus { outline: none; border-color: var(--lavender-deep); }
+  .add-btn {
+    flex: none; width: 42px; height: 42px; border-radius: 12px; border: none;
+    background: var(--jade-deep); color: #fff; font-size: 20px; cursor: pointer;
+  }
+  .add-btn:active { opacity: .85; }
+
+  /* ---------- week nav ---------- */
+  .week-nav {
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--card); border: 1px solid var(--border); border-radius: 16px;
+    padding: 10px 6px; margin-bottom: 12px; box-shadow: var(--shadow);
+  }
+  .week-nav button {
+    border: none; background: var(--bg-soft); color: var(--ink);
+    width: 34px; height: 34px; border-radius: 10px; font-size: 15px; cursor: pointer;
+  }
+  .week-nav .range { font-size: 13.5px; font-weight: 500; text-align: center; }
+  .week-nav .range small { display: block; font-size: 11px; color: var(--ink-soft); font-weight: 400; margin-top: 2px; }
+
+  .day-block { margin-bottom: 12px; }
+  .day-block .day-head {
+    display: flex; align-items: center; gap: 8px; padding: 8px 4px 4px;
+  }
+  .day-block .day-head .dot { width: 8px; height: 8px; border-radius: 50%; }
+  .day-block .day-head strong { font-size: 13.5px; }
+  .day-block .day-head span { font-size: 11.5px; color: var(--ink-soft); }
+  .day-block.today { }
+  .day-block.today .day-head strong { color: var(--pink-deep); }
+
+  /* ---------- food log ---------- */
+  .day-switch {
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--card); border: 1px solid var(--border); border-radius: 16px;
+    padding: 10px 6px; margin-bottom: 12px; box-shadow: var(--shadow);
+  }
+  .day-switch button { border: none; background: var(--bg-soft); color: var(--ink); width: 34px; height: 34px; border-radius: 10px; font-size: 15px; cursor: pointer; }
+  .day-switch .d { font-size: 14px; font-weight: 500; }
+
+  .meal-list { list-style: none; margin: 0; padding: 0; }
+  .meal-list li {
+    display: flex; gap: 10px; align-items: flex-start; padding: 10px 2px; border-bottom: 1px solid var(--border);
+  }
+  .meal-list li:last-child { border-bottom: none; }
+  .meal-tag {
+    flex: none; font-size: 11px; padding: 3px 8px; border-radius: 20px; color: #4a3550; font-weight: 500; margin-top: 2px;
+  }
+  .meal-body { flex: 1; min-width: 0; }
+  .meal-body .t { font-size: 11px; color: var(--ink-soft); margin-bottom: 2px; }
+  .meal-body input { width: 100%; border: none; background: transparent; font-size: 14px; color: var(--ink); font-family: inherit; padding: 2px; }
+  .meal-body input:focus { outline: none; border-bottom: 1px solid var(--lavender-deep); }
+
+  .food-form { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+  .food-form select, .food-form input[type=time] {
+    border: 1px solid var(--border); background: var(--bg-soft); border-radius: 10px;
+    padding: 8px 10px; font-size: 13px; color: var(--ink); font-family: inherit;
+  }
+  .food-form input[type=text] {
+    flex: 1 1 100%; border: 1px solid var(--border); background: var(--bg-soft); border-radius: 12px;
+    padding: 10px 12px; font-size: 14px; color: var(--ink); font-family: inherit; min-width: 0;
+  }
+  .food-form input:focus, .food-form select:focus { outline: none; border-color: var(--lavender-deep); }
+  .food-form .add-btn { margin-left: auto; }
+
+  /* ---------- pomodoro ---------- */
+  .pomo-wrap { display: flex; flex-direction: column; align-items: center; padding: 10px 0 4px; }
+  .pomo-phase { font-size: 13px; color: var(--ink-soft); margin-bottom: 10px; letter-spacing: .5px; }
+  .ring-wrap { position: relative; width: 230px; height: 230px; margin-bottom: 18px; }
+  .ring-wrap svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+  .ring-bg { fill: none; stroke: var(--bg-soft); stroke-width: 14; }
+  .ring-fg { fill: none; stroke: url(#springGrad); stroke-width: 14; stroke-linecap: round; transition: stroke-dashoffset 1s linear; }
+  .ring-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .ring-center .time { font-size: 40px; font-weight: 700; font-family: 'Noto Serif TC', serif; color: var(--ink); }
+  .ring-center .cycles { font-size: 12px; color: var(--ink-soft); margin-top: 4px; }
+  .pomo-controls { display: flex; gap: 12px; margin-top: 4px; }
+  .pomo-btn {
+    border: none; border-radius: 14px; padding: 12px 22px; font-size: 14px; font-weight: 500; cursor: pointer;
+  }
+  .pomo-btn.primary { background: var(--jade-deep); color: #fff; }
+  .pomo-btn.secondary { background: var(--bg-soft); color: var(--ink); }
+  .pomo-settings { display: flex; justify-content: center; gap: 18px; margin-top: 18px; font-size: 12.5px; color: var(--ink-soft); }
+  .pomo-settings label { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .pomo-settings input { width: 60px; text-align: center; border: 1px solid var(--border); border-radius: 8px; padding: 5px; font-family: inherit; background: var(--bg-soft); color: var(--ink); }
+  .pomo-log { margin-top: 16px; }
+  .pomo-log .row { display: flex; justify-content: space-between; font-size: 12.5px; padding: 6px 2px; border-bottom: 1px solid var(--border); color: var(--ink-soft); }
+
+  /* ---------- habits ---------- */
+  .habit-card { padding: 14px 16px; }
+  .habit-head { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+  .habit-name {
+    flex: 1; border: none; background: transparent; font-size: 15px; font-weight: 500;
+    color: var(--ink); font-family: 'Noto Serif TC', serif; padding: 4px 2px; min-width: 0;
+  }
+  .habit-name:focus { outline: none; border-bottom: 1px solid var(--lavender-deep); }
+  .habit-streak { font-size: 11.5px; color: var(--jade-deep); flex: none; white-space: nowrap; }
+  .habit-week { display: flex; justify-content: space-between; gap: 6px; }
+  .habit-day {
+    flex: 1; display: flex; flex-direction: column; align-items: center; gap: 5px;
+    border: none; background: transparent; cursor: pointer; padding: 2px 0;
+  }
+  .habit-day .lbl { font-size: 10.5px; color: var(--ink-faint); }
+  .habit-day .dot {
+    width: 30px; height: 30px; border-radius: 50%; border: 2px solid var(--border);
+    display: flex; align-items: center; justify-content: center; color: transparent; font-size: 13px;
+    background: var(--bg-soft);
+  }
+  .habit-day.today .lbl { color: var(--pink-deep); font-weight: 700; }
+  .habit-day.today .dot { border-color: var(--pink-deep); }
+  .habit-day.checked .dot { background: var(--jade-deep); border-color: var(--jade-deep); color: #fff; }
+  .habit-del { margin-top: 10px; text-align: right; }
+  .habit-del button { border: none; background: transparent; color: var(--ink-faint); font-size: 12px; cursor: pointer; padding: 4px 6px; }
+  .habit-del button:active { color: var(--danger); }
+  .add-habit-row { display: flex; gap: 8px; margin-bottom: 14px; }
+  .add-habit-row input {
+    flex: 1; border: 1px solid var(--border); background: var(--card); border-radius: 12px;
+    padding: 11px 14px; font-size: 14px; color: var(--ink); font-family: inherit; min-width: 0;
+  }
+  .add-habit-row input:focus { outline: none; border-color: var(--lavender-deep); }
+
+  /* ---------- tab bar ---------- */
+  .tabbar {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 10;
+    max-width: 480px; margin: 0 auto;
+    display: flex; background: var(--card); border-top: 1px solid var(--border);
+    padding: 8px 6px calc(8px + env(safe-area-inset-bottom, 0px));
+    box-shadow: 0 -4px 18px rgba(180,140,160,.12);
+  }
+  .tab {
+    flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px;
+    border: none; background: transparent; padding: 6px 2px; cursor: pointer; color: var(--ink-faint);
+    border-radius: 12px;
+  }
+  .tab svg { width: 20px; height: 20px; }
+  .tab span { font-size: 10.5px; }
+  .tab.active { color: var(--pink-deep); background: var(--bg-soft); }
+
+  ::-webkit-scrollbar { width: 0; height: 0; }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <header class="topbar">
+    <div class="brand">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M12 3c1.5 2 1.5 4 0 6-1.5-2-1.5-4 0-6Z" fill="var(--pink)"/><path d="M12 15c1.5 2 1.5 4 0 6-1.5-2-1.5-4 0-6Z" fill="var(--jade)"/><path d="M3 12c2-1.5 4-1.5 6 0-2 1.5-4 1.5-6 0Z" fill="var(--lavender)"/><path d="M15 12c2-1.5 4-1.5 6 0-2 1.5-4 1.5-6 0Z" fill="var(--yellow)"/><circle cx="12" cy="12" r="2.4" fill="var(--pink-deep)"/></svg>
+      <h1 id="pageTitle">今日任務</h1>
+    </div>
+    <div class="sub" id="pageSub"></div>
+  </header>
+
+  <main>
+    <!-- ============ DAILY ============ -->
+    <section class="view active" id="view-daily">
+      <div class="encourage">
+        <div class="quote" id="quoteText"></div>
+        <button id="quoteRefresh" aria-label="換一句">🔄</button>
+      </div>
+      <div class="card">
+        <div class="section-title">
+          <h2 id="dailyDateLabel"></h2>
+          <span class="meta" id="dailyProgress"></span>
+        </div>
+        <ul class="tasks" id="dailyList"></ul>
+        <div class="add-row">
+          <input type="text" id="dailyInput" placeholder="新增今天要做的事…" maxlength="80">
+          <div class="time-pick">
+            <input type="time" id="dailyStart"><span>–</span><input type="time" id="dailyEnd">
+          </div>
+          <button class="add-btn" id="dailyAdd">＋</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ WEEKLY ============ -->
+    <section class="view" id="view-weekly">
+      <div class="week-nav">
+        <button id="weekPrev">‹</button>
+        <div class="range"><span id="weekRangeLabel"></span><small id="weekMetaLabel"></small></div>
+        <button id="weekNext">›</button>
+      </div>
+      <div id="weekDays"></div>
+    </section>
+
+    <!-- ============ FOOD ============ -->
+    <section class="view" id="view-food">
+      <div class="day-switch">
+        <button id="foodPrev">‹</button>
+        <div class="d" id="foodDateLabel"></div>
+        <button id="foodNext">›</button>
+      </div>
+      <div class="card">
+        <div class="section-title"><h2>飲食紀錄</h2><span class="meta" id="foodCount"></span></div>
+        <ul class="meal-list" id="foodList"></ul>
+        <div class="food-form">
+          <select id="foodMeal">
+            <option value="早餐">早餐</option>
+            <option value="午餐">午餐</option>
+            <option value="晚餐">晚餐</option>
+            <option value="點心">點心</option>
+          </select>
+          <input type="time" id="foodTime">
+          <input type="text" id="foodDesc" placeholder="吃了什麼？" maxlength="80">
+          <button class="add-btn" id="foodAdd">＋</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ POMODORO ============ -->
+    <section class="view" id="view-pomodoro">
+      <div class="card">
+        <div class="pomo-wrap">
+          <div class="pomo-phase" id="pomoPhase">專注時段</div>
+          <div class="ring-wrap">
+            <svg viewBox="0 0 230 230">
+              <defs>
+                <linearGradient id="springGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="var(--pink-deep)"/>
+                  <stop offset="50%" stop-color="var(--lavender-deep)"/>
+                  <stop offset="100%" stop-color="var(--jade-deep)"/>
+                </linearGradient>
+              </defs>
+              <circle class="ring-bg" cx="115" cy="115" r="100"/>
+              <circle class="ring-fg" id="ringFg" cx="115" cy="115" r="100"/>
+            </svg>
+            <div class="ring-center">
+              <div class="time" id="pomoTime">50:00</div>
+              <div class="cycles" id="pomoCycleLabel">今日完成 0 個循環</div>
+            </div>
+          </div>
+          <div class="pomo-controls">
+            <button class="pomo-btn primary" id="pomoStart">開始</button>
+            <button class="pomo-btn secondary" id="pomoReset">重設</button>
+          </div>
+          <div class="pomo-settings">
+            <label>專注（分鐘）<input type="number" id="focusMin" min="5" max="120" step="5" value="50"></label>
+            <label>休息（分鐘）<input type="number" id="breakMin" min="1" max="60" step="1" value="10"></label>
+          </div>
+        </div>
+      </div>
+      <div class="card pomo-log">
+        <div class="section-title"><h2>今日紀錄</h2></div>
+        <div id="pomoLog"><div class="empty-hint">還沒有完成的循環</div></div>
+      </div>
+    </section>
+
+    <!-- ============ HABITS ============ -->
+    <section class="view" id="view-habit">
+      <div class="add-habit-row">
+        <input type="text" id="habitInput" placeholder="新增一個想養成的習慣…" maxlength="40">
+        <button class="add-btn" id="habitAdd">＋</button>
+      </div>
+      <div id="habitList"></div>
+    </section>
+  </main>
+
+  <nav class="tabbar">
+    <button class="tab active" data-view="daily">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 5h14v14H5z" stroke-linejoin="round"/><path d="M8 9h8M8 13h5" stroke-linecap="round"/></svg>
+      <span>今日</span>
+    </button>
+    <button class="tab" data-view="weekly">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M8 3v4M16 3v4" stroke-linecap="round"/></svg>
+      <span>本週</span>
+    </button>
+    <button class="tab" data-view="food">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3v8a3 3 0 003 3v7M6 3v6M9 3v6M18 3c-2 1-2 4-2 6s1 3 2 3v9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span>飲食</span>
+    </button>
+    <button class="tab" data-view="pomodoro">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M10 2h4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span>番茄鐘</span>
+    </button>
+    <button class="tab" data-view="habit">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 12l5 5L20 6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span>習慣</span>
+    </button>
+  </nav>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------------- storage ---------------- */
+  var STORE_KEY = "springPlanner_v1";
+  var state = { tasks:{}, foodLog:{}, habits:[], pomo:{ cyclesByDate:{}, focusMin:50, breakMin:10 } };
+  try {
+    var raw = localStorage.getItem(STORE_KEY);
+    if (raw) {
+      var parsed = JSON.parse(raw);
+      state.foodLog = parsed.foodLog || {};
+      state.habits = parsed.habits || [];
+      state.pomo = Object.assign({ cyclesByDate:{}, focusMin:50, breakMin:10 }, parsed.pomo || {});
+      // unify old separate daily/weekly task stores into one per-date store, merging by id
+      state.tasks = {};
+      if (parsed.tasks) {
+        state.tasks = parsed.tasks;
+      } else {
+        var oldDaily = parsed.dailyTasks || {};
+        var oldWeekly = parsed.weeklyTasks || {};
+        Object.keys(oldDaily).forEach(function(d){ state.tasks[d] = (state.tasks[d]||[]).concat(oldDaily[d]); });
+        Object.keys(oldWeekly).forEach(function(weekKey){
+          var wk = oldWeekly[weekKey];
+          var base = weekKey.split("-").map(Number);
+          var baseDate = new Date(base[0], base[1]-1, base[2]);
+          for (var i=0;i<7;i++){
+            var dd = new Date(baseDate); dd.setDate(dd.getDate()+i);
+            var dstr = dd.getFullYear()+"-"+(dd.getMonth()+1<10?"0":"")+(dd.getMonth()+1)+"-"+(dd.getDate()<10?"0":"")+dd.getDate();
+            var existingIds = (state.tasks[dstr]||[]).map(function(t){return t.id;});
+            (wk[i]||[]).forEach(function(t){ if (existingIds.indexOf(t.id)===-1) { state.tasks[dstr] = (state.tasks[dstr]||[]).concat([t]); } });
+          }
+        });
+      }
+    }
+  } catch(e) { console.warn("讀取本機資料失敗，使用預設值", e); }
+
+  function save() {
+    try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); }
+    catch(e) { console.warn("儲存本機資料失敗", e); }
+  }
+
+  /* ---------------- date helpers ---------------- */
+  function pad(n){ return n<10 ? "0"+n : ""+n; }
+  function ymd(d){ return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate()); }
+  function fromYmd(s){ var p=s.split("-").map(Number); return new Date(p[0],p[1]-1,p[2]); }
+  var WEEKDAY_ZH = ["日","一","二","三","四","五","六"];
+  function addDays(d,n){ var nd=new Date(d); nd.setDate(nd.getDate()+n); return nd; }
+  function startOfWeek(d){ var nd=new Date(d); var day=nd.getDay(); var diff=(day===0?-6:1-day); return addDays(nd,diff); } // Monday start
+
+  var today = new Date();
+  var todayStr = ymd(today);
+
+  /* ---------------- encouragement quotes ---------------- */
+  var QUOTES = [
+    "先把眼前這一件做完，其餘的自然清楚。",
+    "今天的進度不必完美，持續推進就好。",
+    "累的時候休息，不是退步，是為了走更遠。",
+    "把大目標拆成小任務，今天只需要贏一小步。",
+    "寫不出來也沒關係，先寫下第一句就好。",
+    "妳已經走到這裡，代表方法是對的。",
+    "先完成，再完美。",
+    "不需要跟昨天比較，跟五分鐘前的自己比就好。",
+    "思考需要時間，給自己一點餘裕。",
+    "今天的努力，會變成之後的底氣。",
+    "把手邊這件事做好，就是對自己負責。",
+    "累積比爆發更可靠，慢慢來也是一種穩定。",
+    "休息也是任務清單的一部分。",
+    "先開始，動力自然會跟上。",
+    "妳值得為自己的專注按個讚。",
+    "今天做到的，都算數。"
+  ];
+  function seededIndex(str, mod){
+    var h = 0;
+    for (var i=0;i<str.length;i++){ h = (h*31 + str.charCodeAt(i)) >>> 0; }
+    return h % mod;
+  }
+  var quoteOverride = null;
+  function renderQuote(){
+    var idx = quoteOverride !== null ? quoteOverride : seededIndex(todayStr, QUOTES.length);
+    document.getElementById("quoteText").textContent = QUOTES[idx];
+  }
+  document.getElementById("quoteRefresh").addEventListener("click", function(){
+    var base = seededIndex(todayStr, QUOTES.length);
+    var next; do { next = Math.floor(Math.random()*QUOTES.length); } while (next===base && QUOTES.length>1);
+    quoteOverride = next;
+    renderQuote();
+  });
+
+  /* ================= DAILY VIEW ================= */
+  var dailyDateEl = document.getElementById("dailyDateLabel");
+  var dailyProgEl = document.getElementById("dailyProgress");
+  var dailyListEl = document.getElementById("dailyList");
+  var dailyInputEl = document.getElementById("dailyInput");
+
+  function getTasksForDate(dateStr){ return state.tasks[dateStr] || (state.tasks[dateStr] = []); }
+  function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
+
+  function renderDaily(){
+    var d = today;
+    dailyDateEl.textContent = (d.getMonth()+1)+"月"+d.getDate()+"日（"+WEEKDAY_ZH[d.getDay()]+"）";
+    var tasks = getTasksForDate(todayStr);
+    var doneCount = tasks.filter(function(t){return t.done;}).length;
+    dailyProgEl.textContent = tasks.length ? (doneCount+" / "+tasks.length+" 完成") : "";
+    dailyListEl.innerHTML = "";
+    if (!tasks.length) {
+      dailyListEl.innerHTML = '<div class="empty-hint">今天還沒有任務，新增一個開始吧。</div>';
+      return;
+    }
+    tasks.forEach(function(t){
+      var li = document.createElement("li");
+      li.className = t.done ? "done" : "";
+      var chk = document.createElement("button");
+      chk.className = "chk" + (t.done ? " done" : "");
+      chk.textContent = t.done ? "✓" : "";
+      chk.addEventListener("click", function(){ t.done = !t.done; save(); renderDaily(); });
+
+      var main = document.createElement("div");
+      main.className = "task-main";
+      var input = document.createElement("input");
+      input.className = "task-text"; input.type = "text"; input.value = t.text;
+      input.addEventListener("blur", function(){ t.text = input.value.trim() || t.text; input.value=t.text; save(); });
+      var timeRow = document.createElement("div");
+      timeRow.className = "task-time";
+      var startIn = document.createElement("input");
+      startIn.type = "time"; startIn.value = t.startTime || "";
+      startIn.addEventListener("change", function(){ t.startTime = startIn.value; save(); });
+      var sep = document.createElement("span");
+      sep.className = "sep"; sep.textContent = "–";
+      var endIn = document.createElement("input");
+      endIn.type = "time"; endIn.value = t.endTime || "";
+      endIn.addEventListener("change", function(){ t.endTime = endIn.value; save(); });
+      timeRow.appendChild(startIn); timeRow.appendChild(sep); timeRow.appendChild(endIn);
+      main.appendChild(input); main.appendChild(timeRow);
+
+      var del = document.createElement("button");
+      del.className = "del"; del.textContent = "✕";
+      del.addEventListener("click", function(){
+        var arr = getTasksForDate(todayStr);
+        var idx = arr.indexOf(t);
+        if (idx>-1) arr.splice(idx,1);
+        save(); renderDaily();
+      });
+      li.appendChild(chk); li.appendChild(main); li.appendChild(del);
+      dailyListEl.appendChild(li);
+    });
+  }
+  function addDailyTask(){
+    var v = dailyInputEl.value.trim();
+    if (!v) return;
+    var startEl = document.getElementById("dailyStart");
+    var endEl = document.getElementById("dailyEnd");
+    getTasksForDate(todayStr).push({ id:uid(), text:v, done:false, startTime:startEl.value, endTime:endEl.value });
+    dailyInputEl.value = ""; startEl.value = ""; endEl.value = "";
+    save(); renderDaily();
+  }
+  document.getElementById("dailyAdd").addEventListener("click", addDailyTask);
+  dailyInputEl.addEventListener("keydown", function(e){ if (e.key==="Enter") addDailyTask(); });
+
+  /* ================= WEEKLY VIEW ================= */
+  var weekOffset = 0;
+  var weekRangeLabel = document.getElementById("weekRangeLabel");
+  var weekMetaLabel = document.getElementById("weekMetaLabel");
+  var weekDaysEl = document.getElementById("weekDays");
+
+  function currentWeekStart(){ return addDays(startOfWeek(today), weekOffset*7); }
+
+  function renderWeekly(){
+    var wStart = currentWeekStart();
+    var wEnd = addDays(wStart,6);
+    weekRangeLabel.textContent = (wStart.getMonth()+1)+"/"+wStart.getDate()+" – "+(wEnd.getMonth()+1)+"/"+wEnd.getDate();
+    weekMetaLabel.textContent = weekOffset===0 ? "本週" : (weekOffset>0 ? "之後第 "+weekOffset+" 週" : "之前第 "+(-weekOffset)+" 週");
+
+    weekDaysEl.innerHTML = "";
+    for (var i=0;i<7;i++){
+      (function(i){
+        var d = addDays(wStart,i);
+        var dateStr = ymd(d);
+        var isToday = dateStr===todayStr;
+        var block = document.createElement("div");
+        block.className = "day-block" + (isToday ? " today" : "");
+        var dotColors = [ "var(--pink-deep)","var(--yellow-deep)","var(--jade-deep)","var(--lavender-deep)","var(--pink-deep)","var(--yellow-deep)","var(--jade-deep)" ];
+        var head = document.createElement("div");
+        head.className = "day-head";
+        head.innerHTML = '<span class="dot" style="background:'+dotColors[i]+'"></span><strong>'+(d.getMonth()+1)+"/"+d.getDate()+"（"+WEEKDAY_ZH[d.getDay()]+"）</strong>"+(isToday?'<span>今天</span>':'');
+        block.appendChild(head);
+
+        var cardEl = document.createElement("div");
+        cardEl.className = "card";
+        var ul = document.createElement("ul");
+        ul.className = "tasks";
+        var dayTasks = getTasksForDate(dateStr);
+        if (!dayTasks.length) {
+          var hint = document.createElement("div");
+          hint.className = "empty-hint";
+          hint.textContent = "還沒有安排";
+          ul.appendChild(hint);
+        } else {
+          dayTasks.forEach(function(t){
+            var li = document.createElement("li");
+            li.className = t.done ? "done" : "";
+            var chk = document.createElement("button");
+            chk.className = "chk" + (t.done?" done":"");
+            chk.textContent = t.done ? "✓" : "";
+            chk.addEventListener("click", function(){ t.done=!t.done; save(); renderWeekly(); });
+
+            var main = document.createElement("div");
+            main.className = "task-main";
+            var input = document.createElement("input");
+            input.className = "task-text"; input.type="text"; input.value = t.text;
+            input.addEventListener("blur", function(){ t.text = input.value.trim() || t.text; input.value=t.text; save(); });
+            var timeRow = document.createElement("div");
+            timeRow.className = "task-time";
+            var startIn = document.createElement("input");
+            startIn.type="time"; startIn.value = t.startTime || "";
+            startIn.addEventListener("change", function(){ t.startTime = startIn.value; save(); });
+            var sep = document.createElement("span");
+            sep.className="sep"; sep.textContent="–";
+            var endIn = document.createElement("input");
+            endIn.type="time"; endIn.value = t.endTime || "";
+            endIn.addEventListener("change", function(){ t.endTime = endIn.value; save(); });
+            timeRow.appendChild(startIn); timeRow.appendChild(sep); timeRow.appendChild(endIn);
+            main.appendChild(input); main.appendChild(timeRow);
+
+            var del = document.createElement("button");
+            del.className="del"; del.textContent="✕";
+            del.addEventListener("click", function(){
+              var arr = getTasksForDate(dateStr);
+              var idx = arr.indexOf(t);
+              if (idx>-1) arr.splice(idx,1);
+              save(); renderWeekly();
+            });
+            li.appendChild(chk); li.appendChild(main); li.appendChild(del);
+            ul.appendChild(li);
+          });
+        }
+        cardEl.appendChild(ul);
+
+        var addRow = document.createElement("div");
+        addRow.className = "add-row";
+        var inp = document.createElement("input");
+        inp.type="text"; inp.placeholder="新增這天的任務…"; inp.maxLength=80;
+        var timePick = document.createElement("div");
+        timePick.className = "time-pick";
+        var addStart = document.createElement("input");
+        addStart.type="time";
+        var addSep = document.createElement("span");
+        addSep.textContent = "–";
+        var addEnd = document.createElement("input");
+        addEnd.type="time";
+        timePick.appendChild(addStart); timePick.appendChild(addSep); timePick.appendChild(addEnd);
+        var btn = document.createElement("button");
+        btn.className="add-btn"; btn.textContent="＋";
+        function addTask(){
+          var v = inp.value.trim();
+          if (!v) return;
+          getTasksForDate(dateStr).push({ id:uid(), text:v, done:false, startTime:addStart.value, endTime:addEnd.value });
+          inp.value=""; addStart.value=""; addEnd.value="";
+          save(); renderWeekly();
+        }
+        btn.addEventListener("click", addTask);
+        inp.addEventListener("keydown", function(e){ if (e.key==="Enter") addTask(); });
+        addRow.appendChild(inp); addRow.appendChild(timePick); addRow.appendChild(btn);
+        cardEl.appendChild(addRow);
+
+        block.appendChild(cardEl);
+        weekDaysEl.appendChild(block);
+      })(i);
+    }
+  }
+  document.getElementById("weekPrev").addEventListener("click", function(){ weekOffset--; renderWeekly(); });
+  document.getElementById("weekNext").addEventListener("click", function(){ weekOffset++; renderWeekly(); });
+
+  /* ================= FOOD VIEW ================= */
+  var foodOffset = 0;
+  var foodDateLabel = document.getElementById("foodDateLabel");
+  var foodListEl = document.getElementById("foodList");
+  var foodCountEl = document.getElementById("foodCount");
+
+  function currentFoodDate(){ return addDays(today, foodOffset); }
+  function getFoodEntries(dateStr){ return state.foodLog[dateStr] || (state.foodLog[dateStr] = []); }
+
+  var MEAL_COLOR = { "早餐":"var(--yellow)", "午餐":"var(--jade)", "晚餐":"var(--lavender)", "點心":"var(--pink)" };
+
+  function renderFood(){
+    var d = currentFoodDate();
+    var dateStr = ymd(d);
+    var label = (ymd(d)===todayStr) ? "今天 " : "";
+    foodDateLabel.textContent = label+(d.getMonth()+1)+"/"+d.getDate()+"（"+WEEKDAY_ZH[d.getDay()]+"）";
+    var entries = getFoodEntries(dateStr);
+    entries.sort(function(a,b){ return (a.time||"").localeCompare(b.time||""); });
+    foodCountEl.textContent = entries.length ? entries.length+" 筆" : "";
+    foodListEl.innerHTML = "";
+    if (!entries.length) {
+      foodListEl.innerHTML = '<div class="empty-hint">今天還沒有紀錄飲食。</div>';
+      return;
+    }
+    entries.forEach(function(en){
+      var li = document.createElement("li");
+      var tag = document.createElement("span");
+      tag.className = "meal-tag"; tag.textContent = en.meal;
+      tag.style.background = MEAL_COLOR[en.meal] || "var(--pink)";
+      var body = document.createElement("div");
+      body.className = "meal-body";
+      var t = document.createElement("div");
+      t.className = "t"; t.textContent = en.time || "";
+      var input = document.createElement("input");
+      input.type="text"; input.value = en.desc;
+      input.addEventListener("blur", function(){ en.desc = input.value.trim() || en.desc; input.value = en.desc; save(); });
+      body.appendChild(t); body.appendChild(input);
+      var del = document.createElement("button");
+      del.className="del"; del.textContent="✕";
+      del.addEventListener("click", function(){
+        var arr = getFoodEntries(dateStr);
+        var idx = arr.indexOf(en);
+        if (idx>-1) arr.splice(idx,1);
+        save(); renderFood();
+      });
+      li.appendChild(tag); li.appendChild(body); li.appendChild(del);
+      foodListEl.appendChild(li);
+    });
+  }
+  document.getElementById("foodPrev").addEventListener("click", function(){ foodOffset--; renderFood(); });
+  document.getElementById("foodNext").addEventListener("click", function(){ foodOffset++; renderFood(); });
+  document.getElementById("foodAdd").addEventListener("click", function(){
+    var mealEl = document.getElementById("foodMeal");
+    var timeEl = document.getElementById("foodTime");
+    var descEl = document.getElementById("foodDesc");
+    var desc = descEl.value.trim();
+    if (!desc) return;
+    var dateStr = ymd(currentFoodDate());
+    getFoodEntries(dateStr).push({ id:uid(), meal:mealEl.value, time:timeEl.value, desc:desc });
+    descEl.value = "";
+    save(); renderFood();
+  });
+
+  /* ================= POMODORO ================= */
+  var pomoPhaseEl = document.getElementById("pomoPhase");
+  var pomoTimeEl = document.getElementById("pomoTime");
+  var pomoCycleLabelEl = document.getElementById("pomoCycleLabel");
+  var ringFg = document.getElementById("ringFg");
+  var pomoStartBtn = document.getElementById("pomoStart");
+  var pomoResetBtn = document.getElementById("pomoReset");
+  var focusMinEl = document.getElementById("focusMin");
+  var breakMinEl = document.getElementById("breakMin");
+  var pomoLogEl = document.getElementById("pomoLog");
+
+  var CIRC = 2 * Math.PI * 100;
+  ringFg.style.strokeDasharray = CIRC;
+
+  focusMinEl.value = state.pomo.focusMin;
+  breakMinEl.value = state.pomo.breakMin;
+
+  var phase = "focus"; // or "break"
+  var totalSec = state.pomo.focusMin*60;
+  var remainSec = totalSec;
+  var running = false;
+  var timerId = null;
+
+  function fmt(sec){
+    var m = Math.floor(sec/60), s = sec%60;
+    return pad(m)+":"+pad(s);
+  }
+  function updateRing(){
+    var frac = remainSec / totalSec;
+    ringFg.style.strokeDashoffset = CIRC * (1-frac);
+  }
+  function renderPomo(){
+    pomoTimeEl.textContent = fmt(remainSec);
+    pomoPhaseEl.textContent = phase==="focus" ? "專注時段" : "休息時段";
+    updateRing();
+    var count = (state.pomo.cyclesByDate[todayStr] || []).length;
+    pomoCycleLabelEl.textContent = "今日完成 "+count+" 個循環";
+    renderPomoLog();
+  }
+  function renderPomoLog(){
+    var list = state.pomo.cyclesByDate[todayStr] || [];
+    if (!list.length) { pomoLogEl.innerHTML = '<div class="empty-hint">還沒有完成的循環</div>'; return; }
+    pomoLogEl.innerHTML = "";
+    list.forEach(function(t, i){
+      var row = document.createElement("div");
+      row.className = "row";
+      row.innerHTML = '<span>第 '+(i+1)+' 循環</span><span>'+t+'</span>';
+      pomoLogEl.appendChild(row);
+    });
+  }
+
+  function tick(){
+    remainSec--;
+    if (remainSec <= 0) {
+      if (phase==="focus") {
+        var list = state.pomo.cyclesByDate[todayStr] || (state.pomo.cyclesByDate[todayStr]=[]);
+        var now = new Date();
+        list.push(pad(now.getHours())+":"+pad(now.getMinutes()));
+        save();
+        phase = "break";
+        totalSec = Math.max(1, (parseInt(breakMinEl.value,10)||10))*60;
+      } else {
+        phase = "focus";
+        totalSec = Math.max(1, (parseInt(focusMinEl.value,10)||50))*60;
+      }
+      remainSec = totalSec;
+    }
+    renderPomo();
+  }
+  function startPause(){
+    if (running) {
+      running = false;
+      clearInterval(timerId);
+      pomoStartBtn.textContent = "繼續";
+    } else {
+      running = true;
+      pomoStartBtn.textContent = "暫停";
+      timerId = setInterval(tick, 1000);
+    }
+  }
+  function resetPomo(){
+    running = false;
+    clearInterval(timerId);
+    phase = "focus";
+    state.pomo.focusMin = Math.max(5, parseInt(focusMinEl.value,10)||50);
+    state.pomo.breakMin = Math.max(1, parseInt(breakMinEl.value,10)||10);
+    save();
+    totalSec = state.pomo.focusMin*60;
+    remainSec = totalSec;
+    pomoStartBtn.textContent = "開始";
+    renderPomo();
+  }
+  pomoStartBtn.addEventListener("click", startPause);
+  pomoResetBtn.addEventListener("click", resetPomo);
+  focusMinEl.addEventListener("change", function(){ if (!running && phase==="focus") resetPomo(); else { state.pomo.focusMin = Math.max(5, parseInt(focusMinEl.value,10)||50); save(); } });
+  breakMinEl.addEventListener("change", function(){ state.pomo.breakMin = Math.max(1, parseInt(breakMinEl.value,10)||10); save(); });
+
+  /* ================= HABITS ================= */
+  var habitListEl = document.getElementById("habitList");
+  var habitInputEl = document.getElementById("habitInput");
+
+  function computeStreak(habit){
+    var count = 0;
+    var d = new Date(today);
+    while (habit.log[ymd(d)]) { count++; d = addDays(d,-1); }
+    return count;
+  }
+
+  function renderHabits(){
+    habitListEl.innerHTML = "";
+    if (!state.habits.length) {
+      habitListEl.innerHTML = '<div class="empty-hint">還沒有習慣，新增一個開始打卡吧。</div>';
+      return;
+    }
+    var wStart = startOfWeek(today);
+    state.habits.forEach(function(h){
+      var card = document.createElement("div");
+      card.className = "card habit-card";
+
+      var head = document.createElement("div");
+      head.className = "habit-head";
+      var nameIn = document.createElement("input");
+      nameIn.className = "habit-name"; nameIn.type = "text"; nameIn.value = h.name;
+      nameIn.addEventListener("blur", function(){ h.name = nameIn.value.trim() || h.name; nameIn.value = h.name; save(); });
+      var streak = document.createElement("span");
+      streak.className = "habit-streak";
+      var sc = computeStreak(h);
+      streak.textContent = sc>0 ? "連續 "+sc+" 天" : "";
+      head.appendChild(nameIn); head.appendChild(streak);
+      card.appendChild(head);
+
+      var week = document.createElement("div");
+      week.className = "habit-week";
+      for (var i=0;i<7;i++){
+        (function(i){
+          var d = addDays(wStart,i);
+          var dstr = ymd(d);
+          var isToday = dstr===todayStr;
+          var checked = !!h.log[dstr];
+          var btn = document.createElement("button");
+          btn.className = "habit-day" + (isToday?" today":"") + (checked?" checked":"");
+          btn.innerHTML = '<span class="lbl">'+WEEKDAY_ZH[d.getDay()]+'</span><span class="dot">'+(checked?'✓':'')+'</span>';
+          btn.addEventListener("click", function(){
+            if (h.log[dstr]) delete h.log[dstr]; else h.log[dstr] = true;
+            save(); renderHabits();
+          });
+          week.appendChild(btn);
+        })(i);
+      }
+      card.appendChild(week);
+
+      var delWrap = document.createElement("div");
+      delWrap.className = "habit-del";
+      var delBtn = document.createElement("button");
+      delBtn.textContent = "刪除這個習慣";
+      delBtn.addEventListener("click", function(){
+        var idx = state.habits.indexOf(h);
+        if (idx>-1) state.habits.splice(idx,1);
+        save(); renderHabits();
+      });
+      delWrap.appendChild(delBtn);
+      card.appendChild(delWrap);
+
+      habitListEl.appendChild(card);
+    });
+  }
+  function addHabit(){
+    var v = habitInputEl.value.trim();
+    if (!v) return;
+    state.habits.push({ id:uid(), name:v, log:{} });
+    habitInputEl.value = "";
+    save(); renderHabits();
+  }
+  document.getElementById("habitAdd").addEventListener("click", addHabit);
+  habitInputEl.addEventListener("keydown", function(e){ if (e.key==="Enter") addHabit(); });
+
+  /* ================= TAB NAV ================= */
+  var TITLES = { daily:["今日任務",""], weekly:["本週任務",""], food:["飲食紀錄",""], pomodoro:["番茄鐘","50 分鐘一個循環"], habit:["習慣養成","每天打卡"] };
+  var tabs = document.querySelectorAll(".tab");
+  var views = document.querySelectorAll(".view");
+  function switchView(name){
+    tabs.forEach(function(t){ t.classList.toggle("active", t.dataset.view===name); });
+    views.forEach(function(v){ v.classList.toggle("active", v.id==="view-"+name); });
+    document.getElementById("pageTitle").textContent = TITLES[name][0];
+    document.getElementById("pageSub").textContent = TITLES[name][1];
+    window.scrollTo(0,0);
+  }
+  tabs.forEach(function(t){ t.addEventListener("click", function(){ switchView(t.dataset.view); }); });
+
+  /* ================= INIT ================= */
+  renderQuote();
+  renderDaily();
+  renderWeekly();
+  renderFood();
+  renderPomo();
+  renderHabits();
+})();
+</script>
+</body>
+</html>
